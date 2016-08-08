@@ -236,10 +236,12 @@
               block__padded-top
               block__border-top">
     <h2>Agenda</h2>
-    <table class="u-w100pct
+    <table class="o-table
+                  table__stack-on-small
+                  table__entry-header-on-small
+                  u-w100pct
                   block
-                  block__flush-top
-                  simple-table">
+                  block__flush-top">
         <thead>
             <tr>
                 <th class="{{ options.time_col_classes }}">Time</th>
@@ -261,7 +263,7 @@
                     &ndash;
                     {{ time.render(bound.end_time.render(), {'time':true, 'timezone':true}) }}
                 </td>
-                <td class="{{ options.agenda_col_classes }} simple-table_row-heading">
+                <td class="{{ options.agenda_col_classes }} o-table_row-heading">
                     {{ bound.description.render() }}
                 </td>
                 <td class="{{ options.location_col_classes }}" data-label="Location">
