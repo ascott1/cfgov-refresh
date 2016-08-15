@@ -182,10 +182,10 @@
 {% macro render(controls, index) %}
     <div class="o-filterable-list-controls"
          id="o-filterable-list-controls-{{ index | string }}">
-        {% set form = filter_data.forms.pop(0) %}
-        {% set posts = filter_data.page_sets.pop(0) %}
-        {% set has_active_filters = page.has_active_filters(request, index) %}
-        {% if has_active_filters %}
+        {% set form = filters.forms.pop(0) %}
+        {% set posts = filters.page_sets.pop(0) %}
+        {% set is_active = has_active_filters(request, index) %}
+        {% if is_active %}
             {% do controls.update({'is_expanded':true}) %}
         {% endif %}
         {% set form_markup = _filters_form(controls, form, index) %}
@@ -205,7 +205,7 @@
             {% endfor %}
         {% endif %}
         {% if 'filterable-list' in controls.form_type and posts is defined %}
-            {% if has_active_filters == false %}
+            {% if not is_active %}
                 {{ notification('success', false, posts.paginator.count ~ ' filtered results') }}
             {% elif posts.paginator.count == 0 %}
                 {{ notification('warning', true,

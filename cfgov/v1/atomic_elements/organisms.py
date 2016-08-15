@@ -211,10 +211,7 @@ class ItemIntroduction(blocks.StructBlock):
         classname = 'block__flush-top'
 
 
-# TODO: FilterControls/Filterable List should be updated to use same
-#       atomic name used on the frontend of FilterableListControls,
-#       or vice versa.
-class FilterControls(BaseExpandable):
+class FilterableListControls(BaseExpandable):
     form_type = blocks.ChoiceBlock(choices=[
         ('filterable-list', 'Filterable List'),
         ('pdf-generator', 'PDF Generator'),
@@ -234,6 +231,20 @@ class FilterControls(BaseExpandable):
                                   label='Filter Authors')
     date_range = blocks.BooleanBlock(default=True, required=False,
                                      label='Filter Date Range')
+    results_limit = atoms.NumberBlock(default=10,
+                                      help_text='Number of results per page')
+
+    def get_filter_form_class(self, block):
+        from ..forms import FilterableListForm, NewsroomFilterForm, \
+            ActivityLogFilterForm
+
+        page_type = block.value['categories'].get('page_type', '')
+        if page_type == 'newsroom':
+            return NewsroomFilterForm
+        elif page_type == 'activity-log':
+            return ActivityLogFilterForm
+        else:
+            return FilterableListForm
 
     class Meta:
         label = 'Filter Controls'

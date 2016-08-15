@@ -1,24 +1,9 @@
 from collections import OrderedDict
 from itertools import chain
 from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.stream_block import StreamValue
 
-from ..atomic_elements import ATOMIC_JS
-
-
-class Handler(object):
-    def __init__(self, page, request):
-        self.page = page
-        self.request = request
-
-    def process(self, context):
-        raise NotImplementedError
-
-    # Retrieves the stream values on a page from it's Streamfield
-    def get_streamfield_blocks(self):
-        page_fields = vars(self.page).values()
-        lst = [val for val in page_fields if isinstance(val, StreamValue)]
-        return list(chain(*lst))
+from . import Handler
+from ...atomic_elements import ATOMIC_JS
 
 
 class JSHandler(Handler):
@@ -30,7 +15,7 @@ class JSHandler(Handler):
         super(JSHandler, self).__init__(page, request)
         self.js_dict = OrderedDict()
 
-    def process(self, context):
+    def handle(self, context):
         self.generate_js_dict()
         if 'media' not in context:
             context['media'] = OrderedDict()
@@ -47,7 +32,8 @@ class JSHandler(Handler):
     # Gets the JS from the Streamfield data
     def add_streamfield_js(self):
         # Create a dictionary with keys ordered organisms, molecules, then atoms
-        for child in self.get_streamfield_blocks():
+        blocks_dict = self.get_streamfield_blocks()
+        for child in chain(*blocks_dict.values()):
             self.add_block_js(child.block)
 
     # Recursively search the blocks and classes for declared Media.js

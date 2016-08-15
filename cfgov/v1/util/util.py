@@ -156,3 +156,11 @@ def all_valid_destinations_for_request(request):
                             valid_destination_for_request(request, pair[1])]
 
     return valid_destinations
+
+
+def has_active_filters(request, index):
+    for key, param in request.GET.items():
+        if key != 'form-id':
+            if param:
+                return True
+    return False

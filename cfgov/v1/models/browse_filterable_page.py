@@ -24,7 +24,7 @@ class BrowseFilterablePage(FilterableFeedPageMixin, FilterableListMixin, CFGOVPa
     ])
     content = StreamField([
         ('full_width_text', organisms.FullWidthText()),
-        ('filter_controls', organisms.FilterControls()),
+        ('filter_controls', organisms.FilterableListControls()),
     ])
 
     secondary_nav_exclude_sibling_pages = models.BooleanField(default=False)
