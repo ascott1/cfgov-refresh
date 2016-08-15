@@ -161,6 +161,6 @@ def all_valid_destinations_for_request(request):
 def has_active_filters(request, index):
     for key, param in request.GET.items():
         if key != 'form-id':
-            if param:
+            if str(index) in key and param:
                 return True
     return False

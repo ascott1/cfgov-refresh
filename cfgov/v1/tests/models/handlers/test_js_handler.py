@@ -1,22 +1,7 @@
 import mock
 from collections import OrderedDict
 from unittest import TestCase
-from ...models.handlers import Handler
-from ...models.handlers.js_handler import JSHandler
-
-
-class TestHandler(TestCase):
-    def setUp(self):
-        self.page = mock.Mock()
-        self.request = mock.Mock()
-        self.handler = Handler(self.page, self.request)
-
-    def test_process_raises_NotImplementedError(self):
-        with self.assertRaises(NotImplementedError) as nie:
-            self.handler.handle({})
-
-    def test_get_streamfield_blocks_returns_list(self):
-        self.assertIsInstance(self.handler.get_streamfield_blocks(), list)
+from ....models.handlers.js_handler import JSHandler
 
 
 class TestJSHandler(TestCase):
@@ -71,3 +56,5 @@ class TestJSHandler(TestCase):
         self.js_handler.add_block_js(block)
         assert mock_assign_js.called
         mock_assign_js.assert_called_with(block)
+
+

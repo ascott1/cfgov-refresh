@@ -50,8 +50,8 @@ class FilterableListHandler(Handler):
         filters = {'forms': forms, 'page_sets': []}
 
         for form, block_tuple in zip(forms, block_tuples):
+            limit = self.results_per_page(block_tuple[1])
             if form.is_valid():
-                limit = self.results_per_page(block_tuple[1])
                 query = form.generate_query()
                 page_set = self.get_page_set(query, self.request.site.hostname)
                 paginator = Paginator(page_set, limit)
