@@ -248,7 +248,7 @@
         {% for block in event.agenda_items %}
           {% set bound = block.value.bound_blocks %}
             <tr>
-                <td >
+                <td>
                     {% import 'macros/time.html' as time %}
                     {{ time.render(
                         bound.start_time.render(),
