@@ -43,11 +43,10 @@ def most_common(lst):
 
 
 def get_form_id(page):
-    form_ids = page.get_filter_ids()
-    if form_ids:
-        return form_ids[0]
-    else:
-        return 0
+    for i, block in enumerate(page.content):
+        if block.block_type == 'filter_controls':
+            return i
+    return 0
 
 
 def instanceOfBrowseOrFilterablePages(page):

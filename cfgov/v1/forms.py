@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from datetime import timedelta
 from itertools import chain
 from util import ERROR_MESSAGES
@@ -74,7 +75,51 @@ class CalenderPDFFilterForm(forms.Form):
         return cleaned_data
 
 
-class FilterableListForm(forms.Form):
+class QueryFormMixin(object):
+    def __init__(self, *args, **kwargs):
+        print "\nWe are in QueryMixin\n"
+        self.query_type = None
+        self.queries = OrderedDict({
+            'generic': [
+                'title__icontains',      # title
+                'date_published__gte',   # from_date
+                'date_published__lte',   # to_date
+                'categories__name__in',  # categories
+                'tags__name__in',        # topics
+                'authors__name__in',     # authors
+            ],
+            'event-archive': [
+                'title__icontains',      # title
+                'start_dt__gte',         # from_date
+                'end_dt__lte',           # to_date
+                'categories__name__in',  # categories
+                'tags__name__in',        # topics
+                'authors__name__in',     # authors
+            ],
+        })
+
+
+    # Returns a list of query strings to associate for each field, ordered by
+    # the field declaration for the form. Note: THEY MUST BE ORDERED IN THE
+    # SAME WAY AS THEY ARE DECLARED IN THE FORM DEFINITION.
+    def _get_query_strings(self):
+        return self.queries.get(self.query_type)
+
+    # Generates a query by iterating over the zipped collection of
+    # tuples.
+    def _generate_query(self):
+        final_query = Q()
+        if self.is_bound:
+            # import pdb; pdb.set_trace()
+            q_tuples = zip(self._get_query_strings(), self.declared_fields)
+            for query, field_name in q_tuples:
+                field_data = self.cleaned_data.get(field_name)
+                if field_data:
+                    final_query &= Q((query, field_data))
+        return final_query
+
+
+class FilterableListForm(forms.Form, QueryFormMixin):
     title_attrs = {
         'placeholder': 'Search for a specific word in item title'
     }
@@ -107,7 +152,9 @@ class FilterableListForm(forms.Form):
     def __init__(self, *args, **kwargs):
         parent = kwargs.pop('parent')
         hostname = kwargs.pop('hostname')
-        super(FilterableListForm, self).__init__(*args, **kwargs)
+        forms.Form.__init__(self)
+        QueryFormMixin.__init__(self)
+        self.query_type = 'generic'
         page_ids = CFGOVPage.objects.live_shared(hostname).descendant_of(parent).values_list('id', flat=True)
         self.set_topics(parent, page_ids, hostname)
         self.set_authors(parent, page_ids, hostname)
@@ -172,47 +219,18 @@ class FilterableListForm(forms.Form):
             field.widget.render = lambda name, value, attrs=None: \
                 old_render(new_name, value, attrs)
 
-    # Generates a query by iterating over the zipped collection of
-    # tuples.
-    def generate_query(self):
-        final_query = Q()
-        if self.is_bound:
-            for query, field_name in zip(self.get_query_strings(), self.declared_fields):
-                if self.cleaned_data.get(field_name):
-                    final_query &= \
-                        Q((query, self.cleaned_data.get(field_name)))
-        return final_query
-
-    # Returns a list of query strings to associate for each field, ordered by
-    # the field declaration for the form. Note: THEY MUST BE ORDERED IN THE
-    # SAME WAY AS THEY ARE DECLARED IN THE FORM DEFINITION.
-    def get_query_strings(self):
-        return [
-            'title__icontains',      # title
-            'date_published__gte',   # from_date
-            'date_published__lte',   # to_date
-            'categories__name__in',  # categories
-            'tags__name__in',        # topics
-            'authors__name__in',     # authors
-        ]
 
 class EventArchiveFilterForm(FilterableListForm):
-    def get_query_strings(self):
-        return [
-            'title__icontains',      # title
-            'start_dt__gte',         # from_date
-            'end_dt__lte',           # to_date
-            'categories__name__in',  # categories
-            'tags__name__in',        # topics
-            'authors__name__in',     # authors
-        ]
+    def __init__(self, *args, **kwargs):
+        super(EventArchiveFilterForm, self).__init__(self, *args, **kwargs)
+        self.query_type = 'event-archive'
 
 
 class NewsroomFilterForm(FilterableListForm):
     def __init__(self, *args, **kwargs):
-        parent = kwargs.pop('parent')
-        hostname = kwargs.pop('hostname')
-        super(FilterableListForm, self).__init__(*args, **kwargs)
+        parent = kwargs.get('parent')
+        hostname = kwargs.get('hostname')
+        super(NewsroomFilterForm, self).__init__(*args, **kwargs)
         try:
             blog = CFGOVPage.objects.get(slug='blog')
         except CFGOVPage.DoesNotExist:
@@ -223,12 +241,11 @@ class NewsroomFilterForm(FilterableListForm):
         self.set_topics(parent, page_ids, hostname)
         self.set_authors(parent, page_ids, hostname)
 
-
-class ActivityLogFilterForm(NewsroomFilterForm):
+class ActivityLogFilterForm(FilterableListForm):
     def __init__(self, *args, **kwargs):
-        parent = kwargs.pop('parent')
-        hostname = kwargs.pop('hostname')
-        super(FilterableListForm, self).__init__(*args, **kwargs)
+        parent = kwargs.get('parent')
+        hostname = kwargs.get('hostname')
+        super(ActivityLogFilterForm, self).__init__(*args, **kwargs)
         query = CFGOVPage.objects.child_of_q(parent)
         for slug in ['blog', 'newsroom', 'research-reports']:
             try:

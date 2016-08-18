@@ -28,6 +28,7 @@ class BrowsePage(CFGOVPage):
         ('expandable', organisms.Expandable()),
         ('expandable_group', organisms.ExpandableGroup()),
         ('table', organisms.Table()),
+        ('filter_controls', organisms.FilterableListControls()),
     ], blank=True)
 
     secondary_nav_exclude_sibling_pages = models.BooleanField(default=False)

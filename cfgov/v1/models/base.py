@@ -13,6 +13,8 @@ from django.contrib.auth.models import User
 
 from wagtail.wagtailimages.models import Image, AbstractImage, AbstractRendition
 from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
+
+from wagtail.wagtailcore import hooks
 from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Page, PagePermissionTester, \
     UserPagePermissionsProxy, Orderable, PageManager, PageQuerySet
@@ -25,13 +27,10 @@ from modelcluster.tags import ClusterTaggableManager
 
 from sheerlike.query import QueryFinder
 
-from .handlers.js_handler import JSHandler
-from .handlers.filterable_list_handler import FilterableListHandler
 from .. import get_protected_url
 from ..atomic_elements import molecules, organisms
 from ..util import util, ref
 
-PAGE_HANDLERS = [JSHandler, FilterableListHandler]
 
 
 
@@ -216,9 +215,8 @@ class CFGOVPage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super(CFGOVPage, self).get_context(request, *args, **kwargs)
-        for handler_class in PAGE_HANDLERS:
-            handler = handler_class(self, request)
-            handler.handle(context)
+        for hook in hooks.get_hooks('cfgov_context_handlers'):
+            hook(self, request, context)
         return context
 
     @property

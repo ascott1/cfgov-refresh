@@ -11,11 +11,11 @@ class JSHandler(Handler):
         Gathers all the JS files specific to this page and its current
         Streamfield's blocks and puts them in the template context.
     """
-    def __init__(self, page, request):
-        super(JSHandler, self).__init__(page, request)
+    def __init__(self, *args, **kwargs):
+        super(JSHandler, self).__init__(*args, **kwargs)
         self.js_dict = OrderedDict()
 
-    def handle(self, context):
+    def handle(self):
         self.generate_js_dict()
         if 'media' not in context:
             context['media'] = OrderedDict()
