@@ -1,10 +1,7 @@
 import json
 import os
 import urllib
-from itertools import chain
-from collections import OrderedDict
 
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_delete
@@ -16,10 +13,6 @@ from django.contrib.auth.models import User
 
 from wagtail.wagtailimages.models import Image, AbstractImage, AbstractRendition
 from wagtail.wagtailadmin.edit_handlers import StreamFieldPanel
-from wagtail.wagtailcore import blocks
-from wagtail.wagtailcore.blocks.stream_block import StreamValue
-from wagtail.wagtailcore.fields import StreamField
-from wagtail.wagtailcore.templatetags.wagtailcore_tags import slugurl
 from wagtail.wagtailcore.fields import StreamField
 from wagtail.wagtailcore.models import Page, PagePermissionTester, \
     UserPagePermissionsProxy, Orderable, PageManager, PageQuerySet
@@ -29,8 +22,6 @@ from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, \
 from taggit.models import TaggedItemBase
 from modelcluster.fields import ParentalKey
 from modelcluster.tags import ClusterTaggableManager
-
-from sheerlike.query import QueryFinder
 
 from .handlers import JSHandler
 from .. import get_protected_url

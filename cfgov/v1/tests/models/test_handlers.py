@@ -15,7 +15,7 @@ class TestHandler(TestCase):
             self.handler.process({})
 
     def test_get_streamfield_blocks_returns_list(self):
-        assert type(self.handler.get_streamfield_blocks()) is list
+        self.assertIsInstance(self.handler.get_streamfield_blocks(), list)
 
 
 class TestJSHandler(TestCase):
@@ -34,11 +34,11 @@ class TestJSHandler(TestCase):
         context = {}
         self.js_handler.process(context)
         assert 'media' in context
-        assert type(context['media']) is OrderedDict
+        self.assertIsInstance(context['media'], OrderedDict)
 
     @mock.patch('v1.models.handlers.JSHandler.add_streamfield_js')
     def test_generate_js_dict_returns_OrderedDict(self, mock_add_sf_js):
-        assert type(self.js_handler.js_dict) is OrderedDict
+        self.assertIsInstance(self.js_handler.js_dict, OrderedDict)
 
     @mock.patch('v1.models.handlers.JSHandler.add_streamfield_js')
     def test_generate_js_dict_calls_page_add_page_js(self, mock_add_sf_js):

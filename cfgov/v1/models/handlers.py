@@ -16,8 +16,8 @@ class Handler(object):
 
     # Retrieves the stream values on a page from it's Streamfield
     def get_streamfield_blocks(self):
-        lst = [value for key, value in vars(self.page).iteritems()
-               if type(value) is StreamValue]
+        page_fields = vars(self.page).values()
+        lst = [val for val in page_fields if isinstance(val, StreamValue)]
         return list(chain(*lst))
 
 
@@ -32,7 +32,9 @@ class JSHandler(Handler):
 
     def process(self, context):
         self.generate_js_dict()
-        context['media'] = self.js_dict
+        if 'media' not in context:
+            context['media'] = OrderedDict()
+        context['media'].update(self.js_dict)
 
     def generate_js_dict(self):
         for key in ['template', 'organisms', 'molecules', 'atoms', 'other']:
@@ -59,19 +61,15 @@ class JSHandler(Handler):
 
     # Assign the Media js to the dictionary appropriately
     def assign_js(self, obj):
-        try:
-            if hasattr(obj.Media, 'js'):
-                class_name = type(obj).__name__
-                for key in self.js_dict:
-                    if key in ATOMIC_JS:
-                        if class_name in ATOMIC_JS[key]:
-                            self.add_files(key, obj.Media.js)
-                            break
-                    elif key == 'other':
-                        self.add_files(key, obj.Media.js)
-                        break
-        except AttributeError:
-            pass
+        if hasattr(obj, 'Media') and hasattr(obj.Media, 'js'):
+            class_name = type(obj).__name__
+            for key in self.js_dict:
+                if key in ATOMIC_JS and class_name in ATOMIC_JS[key]:
+                    self.add_files(key, obj.Media.js)
+                    break
+                elif key == 'other':
+                    self.add_files(key, obj.Media.js)
+                    break
 
     def add_files(self, key, filenames):
         self.js_dict[key] += [name for name in filenames
